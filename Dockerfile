@@ -1,4 +1,8 @@
-FROM python:3.9-slim
+FROM python:3.13-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    POETRY_VIRTUALENVS_CREATE=false \
+    POETRY_NO_INTERACTION=1
 
 WORKDIR /app
 
@@ -8,9 +12,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Копируем зависимости
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Устанавливаем Poetry и зависимости проекта
+RUN pip install --no-cache-dir poetry
+COPY pyproject.toml poetry.lock ./
+RUN poetry install --no-root --only main
 
 # Копируем проект
 COPY . .
@@ -19,4 +24,4 @@ COPY . .
 RUN mkdir -p data results models
 
 # Команда по умолчанию
-CMD ["python", "src/main.py"]
+CMD ["python", "-m", "src.main"]
