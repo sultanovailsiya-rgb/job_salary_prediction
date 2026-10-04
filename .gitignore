@@ -1,0 +1,16 @@
+# Виртуальные окружения
+.venv/
+venv/
+
+# Кэш Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Секреты и локальные настройки
+.env
+
+# Эксперименты и IDE
+mlruns/
+.idea/
+mlflow.db
