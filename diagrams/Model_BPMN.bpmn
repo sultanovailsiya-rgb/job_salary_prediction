@@ -29,7 +29,7 @@
     </bpmn:laneSet>
     <bpmn:startEvent id="s1" name="Открыта новая вакансия" />
     <bpmn:userTask id="t1" name="Ввести параметры вакансии (9 признаков)" />
-    <bpmn:serviceTask id="t2" name="Предсказать годовую зарплату (обученный pipeline)" />
+    <bpmn:serviceTask id="t2" name="Предсказать среднегодовую зарплату (обученный pipeline)" />
     <bpmn:userTask id="t3" name="Проверить прогноз, сформировать вилку" />
     <bpmn:exclusiveGateway id="g1" name="Прогноз адекватен?" />
     <bpmn:userTask id="t4" name="Скорректировать вручную по рынку" />
@@ -44,7 +44,7 @@
     <bpmn:endEvent id="e3" name="Модель стабильна" />
     <bpmn:sequenceFlow id="Flow_0" sourceRef="s1" targetRef="t1" />
     <bpmn:sequenceFlow id="Flow_1" sourceRef="t1" targetRef="t2" />
-    <bpmn:sequenceFlow id="Flow_2" sourceRef="t2" targetRef="t3" name="прогноз, USD" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="t2" targetRef="t3" name="прогноз USD/год" />
     <bpmn:sequenceFlow id="Flow_3" sourceRef="t3" targetRef="g1" />
     <bpmn:sequenceFlow id="Flow_4" sourceRef="g1" targetRef="g1m" name="да" />
     <bpmn:sequenceFlow id="Flow_5" sourceRef="g1" targetRef="t4" name="нет" />
