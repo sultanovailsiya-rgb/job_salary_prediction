@@ -36,7 +36,7 @@
     <bpmn:exclusiveGateway id="g1m" name="" />
     <bpmn:userTask id="t5" name="Включить зарплату в вакансию" />
     <bpmn:endEvent id="e1" name="Вакансия опубликована" />
-    <bpmn:startEvent id="s2" name="Раз в месяц"><bpmn:timerEventDefinition /></bpmn:startEvent>
+    <bpmn:startEvent id="s2" name="Каждый день, 02:00"><bpmn:timerEventDefinition /></bpmn:startEvent>
     <bpmn:serviceTask id="m1" name="Посчитать MAPE на фактических зарплатах" />
     <bpmn:exclusiveGateway id="g2" name="MAPE вырос более чем на 20 %?" />
     <bpmn:callActivity id="m2" name="Переобучить модель (см. схему переобучения)" />

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_retrain" targetNamespace="http://bpmn.io/schema/bpmn">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_retrain" targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn:collaboration id="Collab_retrain">
     <bpmn:participant id="Part_retrain" name="Автоматическое переобучение модели" processRef="Process_retrain" />
   </bpmn:collaboration>
@@ -7,6 +7,9 @@
     <bpmn:laneSet id="LaneSet_retrain">
       <bpmn:lane id="L_A" name="Планировщик и мониторинг">
         <bpmn:flowNodeRef>s1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s3</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>s4</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="L_B" name="ML-пайплайн (Optuna, MLflow)">
         <bpmn:flowNodeRef>b1</bpmn:flowNodeRef>
@@ -33,7 +36,10 @@
         <bpmn:flowNodeRef>ed1</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:startEvent id="s1" name="Триггер: дрейф MAPE, новые данные или расписание" />
+    <bpmn:startEvent id="s1" name="1-е число месяца, 03:00 — плановое переобучение (раз в месяц)"><bpmn:timerEventDefinition id="Timer_1"><bpmn:timeCycle xsi:type="bpmn:tFormalExpression">R/2026-01-01T03:00/P1M</bpmn:timeCycle></bpmn:timerEventDefinition></bpmn:startEvent>
+    <bpmn:startEvent id="s2" name="Ежедневно 02:00 — дрейф MAPE: &gt; 5 % или +20 % к эталону (2 дня подряд)"><bpmn:conditionalEventDefinition id="Cond_1"><bpmn:condition xsi:type="bpmn:tFormalExpression">MAPE &gt; 5% или drift_ratio &gt; 1.2</bpmn:condition></bpmn:conditionalEventDefinition></bpmn:startEvent>
+    <bpmn:startEvent id="s3" name="Пн 03:00 — накопилось ≥ 10 % новых записей (≈ 25 000)"><bpmn:conditionalEventDefinition id="Cond_2"><bpmn:condition xsi:type="bpmn:tFormalExpression">new_records &gt;= 10% обучающей выборки</bpmn:condition></bpmn:conditionalEventDefinition></bpmn:startEvent>
+    <bpmn:startEvent id="s4" name="Ручной запуск ML-инженером — в любой момент"><bpmn:messageEventDefinition id="Msg_1" /></bpmn:startEvent>
     <bpmn:serviceTask id="b1" name="Загрузить и подготовить новые данные" />
     <bpmn:exclusiveGateway id="gb1" name="Данные корректны?" />
     <bpmn:userTask id="d1" name="Разобрать проблему с данными" />
@@ -53,6 +59,9 @@
     <bpmn:serviceTask id="c4" name="Откатить на предыдущую версию" />
     <bpmn:endEvent id="ec2" name="Работает прежняя версия" />
     <bpmn:sequenceFlow id="Flow_0" sourceRef="s1" targetRef="b1" />
+    <bpmn:sequenceFlow id="Flow_0b" sourceRef="s2" targetRef="b1" />
+    <bpmn:sequenceFlow id="Flow_0c" sourceRef="s3" targetRef="b1" />
+    <bpmn:sequenceFlow id="Flow_0d" sourceRef="s4" targetRef="b1" />
     <bpmn:sequenceFlow id="Flow_1" sourceRef="b1" targetRef="gb1" />
     <bpmn:sequenceFlow id="Flow_2" sourceRef="gb1" targetRef="b2" name="да" />
     <bpmn:sequenceFlow id="Flow_3" sourceRef="gb1" targetRef="d1" name="нет" />
@@ -78,7 +87,10 @@
       <bpmndi:BPMNShape id="Shape_L_B" bpmnElement="L_B" isHorizontal="true"><dc:Bounds x="50" y="180" width="2050" height="260" /></bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_L_C" bpmnElement="L_C" isHorizontal="true"><dc:Bounds x="50" y="440" width="2050" height="260" /></bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_L_D" bpmnElement="L_D" isHorizontal="true"><dc:Bounds x="50" y="700" width="2050" height="160" /></bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_s1" bpmnElement="s1"><dc:Bounds x="132" y="82" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_s1" bpmnElement="s1"><dc:Bounds x="132" y="82" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="40" y="122" width="220" height="56" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_s2" bpmnElement="s2"><dc:Bounds x="560" y="82" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="470" y="122" width="220" height="56" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_s3" bpmnElement="s3"><dc:Bounds x="1060" y="82" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="970" y="122" width="220" height="56" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_s4" bpmnElement="s4"><dc:Bounds x="1560" y="82" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="1470" y="122" width="220" height="56" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_b1" bpmnElement="b1"><dc:Bounds x="235" y="220" width="110" height="80" /></bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_gb1" bpmnElement="gb1" isMarkerVisible="true"><dc:Bounds x="405" y="235" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="370" y="191" width="120" height="40" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_d1" bpmnElement="d1"><dc:Bounds x="515" y="740" width="110" height="80" /></bpmndi:BPMNShape>
@@ -98,6 +110,9 @@
       <bpmndi:BPMNShape id="Shape_c4" bpmnElement="c4"><dc:Bounds x="1775" y="580" width="110" height="80" /></bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_ec2" bpmnElement="ec2"><dc:Bounds x="1952" y="602" width="36" height="36" /></bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_0" bpmnElement="Flow_0"><di:waypoint x="168" y="100" /><di:waypoint x="201" y="100" /><di:waypoint x="201" y="260" /><di:waypoint x="235" y="260" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_0b" bpmnElement="Flow_0b"><di:waypoint x="596" y="100" /><di:waypoint x="700" y="100" /><di:waypoint x="700" y="205" /><di:waypoint x="275" y="205" /><di:waypoint x="275" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_0c" bpmnElement="Flow_0c"><di:waypoint x="1096" y="100" /><di:waypoint x="1200" y="100" /><di:waypoint x="1200" y="210" /><di:waypoint x="305" y="210" /><di:waypoint x="305" y="220" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_0d" bpmnElement="Flow_0d"><di:waypoint x="1596" y="100" /><di:waypoint x="1700" y="100" /><di:waypoint x="1700" y="215" /><di:waypoint x="335" y="215" /><di:waypoint x="335" y="220" /></bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_1" bpmnElement="Flow_1"><di:waypoint x="345" y="260" /><di:waypoint x="405" y="260" /></bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_2" bpmnElement="Flow_2"><di:waypoint x="455" y="260" /><di:waypoint x="515" y="260" /></bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_3" bpmnElement="Flow_3"><di:waypoint x="430" y="285" /><di:waypoint x="430" y="780" /><di:waypoint x="515" y="780" /></bpmndi:BPMNEdge>
